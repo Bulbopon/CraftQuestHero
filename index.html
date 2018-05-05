@@ -1,0 +1,2089 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>Boss Hunter Caravan v0.03</title>
+	<script type="text/javascript" src="phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(550, 400, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+{//Variable Declarations
+
+//Background variables
+var mineBG, gatherBG, woodcutBG, fishBG, huntBG, bugCatchBG, trainBG, equipsBG, itemsBG, questBG;
+
+//Action button needs to be defined so it can lose functionality when training, items, and equip pages are drawn
+var actionButton, retryButton, collectButton;
+
+//Icon variables
+var mineIcon, gatherIcon, woodcutIcon, fishIcon, huntIcon, bugCatchIcon, questIcon;
+
+//Text related variables. Three main textfields. Gold textfield. Button descriptors. Seven list texts for items and equips. Seven amount lists for items.
+var text1, text2, text3, goldText, essenceText, buttonText1, buttonText2, buttonText3, listText1, listText2, listText3, listText4, listText5, listText6, listText7;
+var listTextArray;
+
+var amountText1, amountText2, amountText3, amountText4, amountText5, amountText6, amountText7;
+var amountTextArray;
+
+//Keeps track of which icon is clicked, for equip and item purposes
+var iconIndex;
+
+//Seven button variables for each 3 slots
+var buttonA1, buttonA2, buttonA3, buttonA4, buttonA5, buttonA6, buttonA7;
+var buttonB1, buttonB2, buttonB3, buttonB4, buttonB5, buttonB6, buttonB7;
+var buttonC1, buttonC2, buttonC3, buttonC4, buttonC5, buttonC6, buttonC7;
+
+var buttonArray;
+
+//Item variables, arrays, and a master array that contains them all
+var pickaxeItem1, pickaxeItem2, pickaxeItem3, pickaxeItem4, pickaxeItem5, pickaxeItem6, pickaxeItem7;
+var glovesItem1, glovesItem2, glovesItem3, glovesItem4, glovesItem5, glovesItem6, glovesItem7;
+var axe1, axe2, axe3, axe4, axe5, axe6, axe7;
+var fishrodItem1, fishrodItem2, fishrodItem3, fishrodItem4, fishrodItem5, fishrodItem6, fishrodItem7;
+var bowItem1, bowItem2, bowItem3, bowItem4, bowItem5, bowItem6, bowItem7;
+var bugnetItem1, bugnetItem2, bugnetItem3, bugnetItem4, bugnetItem5, bugnetItem6, bugnetItem7;
+
+var pickaxeItemArray, glovesItemArray, axeItemArray, fishrodItemArray, bowItemArray, bugnetItemArray;
+
+var itemMasterArray;
+var monsterDropArray;
+
+//Equipment variables, arrays, and a master array that contains them all
+var pickaxe1, pickaxe2, pickaxe3, pickaxe4, pickaxe5;
+var gloves1, gloves2, gloves3, gloves4, gloves5;
+var axe1, axe2, axe3, axe4, axe5;
+var fishrod1, fishrod2, fishrod3, fishrod4, fishrod5;
+var bow1, bow2, bow3, bow4, bow5;
+var bugnet1, bugnet2, bugnet3, bugnet4, bugnet5;
+
+var sword1, sword2, sword3, sword4, sword5;
+
+var pickaxeArray, glovesArray, axeArray, fishrodArray, bowArray, bugnetArray, swordArray;
+
+var equipMasterArray;
+
+//Copies of the equipment, so it can be displayed in the icon slot
+var pickaxeIcon1, pickaxeIcon2, pickaxeIcon3, pickaxeIcon4, pickaxeIcon5;
+var glovesIcon1, glovesIcon2, glovesIcon3, glovesIcon4, glovesIcon5;
+var axeIcon1, axeIcon2, axeIcon3, axeIcon4, axeIcon5;
+var fishrodIcon1, fishrodIcon2, fishrodIcon3, fishrodIcon4, fishrodIcon5;
+var bowIcon1, bowIcon2, bowIcon3, bowIcon4, bowIcon5;
+var bugnetIcon1, bugnetIcon2, bugnetIcon3, bugnetIcon4, bugnetIcon5;
+
+var swordIcon1;
+
+var pickaxeIconArray, glovesIconArray, axeIconArray, fishrodIconArray, bowIconArray, bugnetIconArray, swordIconArray;
+
+var equipIconMasterArray;
+
+//Battle related variables
+var playerTimer, monsterTimer;
+
+//Monster variables
+var monster1, monster2, monster3, monster4, monster5;
+
+//Keeps track of gold and essence
+var gold = 99, essence = 9999;
+
+//Stat variables
+var currentHealth = 10, maxHealth = 10, baseAttack = 1, baseDefense = 1, baseAttackSpeed = 1, totalAttack, totalDefense, totalAttackSpeed;
+
+//Keeps track of current area and current icon area.
+var currentArea = "";
+
+//Keeps track of current equip
+var currentEquip;
+
+//Keeps track of current icon
+var currentIcon;
+
+//Keeps track of current monster1
+var currentMonster;
+
+//Keeps track of current equipment levels
+var currentEquipLevels = [0, 0, 0, 0, 0, 0, 0];
+
+//Keeps track of all current item amounts
+var inventory = [[99, 99, 99, 99, 99, 99 ,99], [99, 99, 99, 99, 99, 99 ,99], [99, 99, 99, 99, 99, 99 ,99], [99, 99, 99, 99, 99, 99 ,99], [99, 99, 99, 99, 99, 99 ,99], [99, 99, 99, 99, 99, 99 ,99], [99, 99, 99, 99, 99, 99]];
+//var inventory = [[0, 0, 0, 0, 0, 0 ,0], [0, 0, 0, 0, 0, 0 ,0], [0, 0, 0, 0, 0, 0 ,0], [0, 0, 0, 0, 0, 0 ,0], [0, 0, 0, 0, 0, 0 ,0], [0, 0, 0, 0, 0, 0 ,0], [0, 0, 0, 0, 0, 0]];
+}
+
+function preload() 
+{
+	//Load all images. Load backgrounds, character, buttons, items, equipments, and icons
+	game.load.image("mainBG", "assets/mainBG.png");
+	game.load.image("mineBG", "assets/mineBG.png");
+	game.load.image("gatherBG", "assets/gatherBG.png");
+	game.load.image("woodcutBG", "assets/woodcutBG.png");
+	game.load.image("fishBG", "assets/fishBG.png");
+	game.load.image("huntBG", "assets/huntBG.png");
+	game.load.image("bugCatchBG", "assets/bugCatchBG.png");
+	
+	game.load.image("trainingBG", "assets/trainingBG.png");
+	game.load.image("equipsBG", "assets/equipsBG.png");
+	game.load.image("itemsBG", "assets/itemsBG.png");
+	game.load.image("questBG", "assets/questBG.png");
+	
+	game.load.image("char", "assets/char.png");
+	
+	game.load.image("actionButton", "assets/actionButton.png");
+	game.load.image("mineButton", "assets/mineButton.png");
+	game.load.image("gatherButton", "assets/gatherButton.png");
+	game.load.image("woodcutButton", "assets/woodcutButton.png");
+	game.load.image("fishButton", "assets/fishButton.png");
+	game.load.image("huntButton", "assets/huntButton.png");
+	game.load.image("bugCatchButton", "assets/bugCatchButton.png");
+	game.load.image("retryButton", "assets/retryButton.png");
+	game.load.image("collectButton", "assets/collectButton.png");
+	
+	game.load.image("trainingButton", "assets/trainingButton.png");
+	game.load.image("itemsButton", "assets/itemsButton.png");
+	game.load.image("equipsButton", "assets/equipsButton.png");
+	game.load.image("questButton", "assets/questButton.png");
+	
+	game.load.image("pickaxeItem1", "assets/pickaxeItem1.png");
+	game.load.image("pickaxeItem2", "assets/pickaxeItem2.png");
+	game.load.image("pickaxeItem3", "assets/pickaxeItem3.png");
+	game.load.image("pickaxeItem4", "assets/pickaxeItem4.png");
+	game.load.image("pickaxeItem5", "assets/pickaxeItem5.png");
+	game.load.image("pickaxeItem6", "assets/pickaxeItem6.png");
+	game.load.image("pickaxeItem7", "assets/pickaxeItem7.png");
+	game.load.image("glovesItem1", "assets/pickaxeItem1.png");
+	game.load.image("glovesItem2", "assets/pickaxeItem2.png");
+	game.load.image("glovesItem3", "assets/pickaxeItem3.png");
+	game.load.image("glovesItem4", "assets/pickaxeItem4.png");
+	game.load.image("glovesItem5", "assets/pickaxeItem5.png");
+	game.load.image("glovesItem6", "assets/pickaxeItem6.png");
+	game.load.image("glovesItem7", "assets/pickaxeItem7.png");
+	game.load.image("axeItem1", "assets/pickaxeItem1.png");
+	game.load.image("axeItem2", "assets/pickaxeItem2.png");
+	game.load.image("axeItem3", "assets/pickaxeItem3.png");
+	game.load.image("axeItem4", "assets/pickaxeItem4.png");
+	game.load.image("axeItem5", "assets/pickaxeItem5.png");
+	game.load.image("axeItem6", "assets/pickaxeItem6.png");
+	game.load.image("axeItem7", "assets/pickaxeItem7.png");
+	game.load.image("fishrodItem1", "assets/pickaxeItem1.png");
+	game.load.image("fishrodItem2", "assets/pickaxeItem2.png");
+	game.load.image("fishrodItem3", "assets/pickaxeItem3.png");
+	game.load.image("fishrodItem4", "assets/pickaxeItem4.png");
+	game.load.image("fishrodItem5", "assets/pickaxeItem5.png");
+	game.load.image("fishrodItem6", "assets/pickaxeItem6.png");
+	game.load.image("fishrodItem7", "assets/pickaxeItem7.png");
+	game.load.image("bowItem1", "assets/pickaxeItem1.png");
+	game.load.image("bowItem2", "assets/pickaxeItem2.png");
+	game.load.image("bowItem3", "assets/pickaxeItem3.png");
+	game.load.image("bowItem4", "assets/pickaxeItem4.png");
+	game.load.image("bowItem5", "assets/pickaxeItem5.png");
+	game.load.image("bowItem6", "assets/pickaxeItem6.png");
+	game.load.image("bowItem7", "assets/pickaxeItem7.png");
+	game.load.image("bugnetItem1", "assets/pickaxeItem1.png");
+	game.load.image("bugnetItem2", "assets/pickaxeItem2.png");
+	game.load.image("bugnetItem3", "assets/pickaxeItem3.png");
+	game.load.image("bugnetItem4", "assets/pickaxeItem4.png");
+	game.load.image("bugnetItem5", "assets/pickaxeItem5.png");
+	game.load.image("bugnetItem6", "assets/pickaxeItem6.png");
+	game.load.image("bugnetItem7", "assets/pickaxeItem7.png");
+	
+	game.load.image("monsterDrop1", "assets/monsterDrop1.png");
+	game.load.image("monsterDrop2", "assets/monsterDrop2.png");
+	game.load.image("monsterDrop3", "assets/monsterDrop3.png");
+	game.load.image("monsterDrop4", "assets/monsterDrop4.png");
+	game.load.image("monsterDrop5", "assets/monsterDrop5.png");
+	game.load.image("monsterDrop6", "assets/monsterDrop6.png");
+	
+	game.load.image("pickaxe1", "assets/pickaxe1.png");
+	game.load.image("pickaxe2", "assets/pickaxe2.png");
+	game.load.image("pickaxe3", "assets/pickaxe3.png");
+	game.load.image("pickaxe4", "assets/pickaxe4.png");
+	game.load.image("pickaxe5", "assets/pickaxe5.png");
+	game.load.image("gloves1", "assets/gloves1.png");
+	game.load.image("gloves2", "assets/gloves2.png");
+	game.load.image("gloves3", "assets/gloves3.png");
+	game.load.image("gloves4", "assets/gloves4.png");
+	game.load.image("gloves5", "assets/gloves5.png");
+	game.load.image("axe1", "assets/axe1.png");
+	game.load.image("axe2", "assets/axe2.png");
+	game.load.image("axe3", "assets/axe3.png");
+	game.load.image("axe4", "assets/axe4.png");
+	game.load.image("axe5", "assets/axe5.png");
+	game.load.image("fishrod1", "assets/fishrod1.png");
+	game.load.image("fishrod2", "assets/fishrod2.png");
+	game.load.image("fishrod3", "assets/fishrod3.png");
+	game.load.image("fishrod4", "assets/fishrod4.png");
+	game.load.image("fishrod5", "assets/fishrod5.png");
+	game.load.image("bow1", "assets/bow1.png");
+	game.load.image("bow2", "assets/bow2.png");
+	game.load.image("bow3", "assets/bow3.png");
+	game.load.image("bow4", "assets/bow4.png");
+	game.load.image("bow5", "assets/bow5.png");
+	game.load.image("bugnet1", "assets/bugnet1.png");
+	game.load.image("bugnet2", "assets/bugnet2.png");
+	game.load.image("bugnet3", "assets/bugnet3.png");
+	game.load.image("bugnet4", "assets/bugnet4.png");
+	game.load.image("bugnet5", "assets/bugnet5.png");
+	
+	game.load.image("sword1", "assets/sword1.png");
+	
+	game.load.image("mineIcon", "assets/mineIcon.png");
+	game.load.image("gatherIcon", "assets/gatherIcon.png");
+	game.load.image("woodcutIcon", "assets/woodcutIcon.png");
+	game.load.image("fishIcon", "assets/fishIcon.png");
+	game.load.image("huntIcon", "assets/huntIcon.png");
+	game.load.image("bugCatchIcon", "assets/bugCatchIcon.png");
+	game.load.image("questIcon", "assets/questIcon.png");
+	
+	game.load.image("button", "assets/button.png");
+	
+	game.load.spritesheet("monster1", "assets/monster1.png", 250, 200, 3);
+}
+
+
+function create() 
+{
+    //Initialize backgrounds, character, and buttons. Add listeners to buttons.
+	game.add.sprite(0, 0, "mainBG");
+	mineBG = game.add.sprite(101, 1, "mineBG");
+	gatherBG = game.add.sprite(101, 1, "gatherBG");
+	woodcutBG = game.add.sprite(101, 1, "woodcutBG");
+	fishBG = game.add.sprite(101, 1, "fishBG");
+	huntBG = game.add.sprite(101, 1, "huntBG");
+	bugCatchBG = game.add.sprite(101, 1, "bugCatchBG");
+	
+	trainingBG = game.add.sprite(101, 1, "trainingBG");
+	questBG = game.add.sprite(101, 1, "questBG");
+	
+	game.add.sprite(100, 0, "char");
+	
+	equipsBG = game.add.sprite(101, 1, "equipsBG");
+	itemsBG = game.add.sprite(101, 1, "itemsBG");
+	
+	mineIcon = game.add.sprite(105, 230, "mineIcon");
+	gatherIcon = game.add.sprite(155, 230, "gatherIcon");
+	woodcutIcon = game.add.sprite(205, 230, "woodcutIcon");
+	fishIcon = game.add.sprite(255, 230, "fishIcon");
+	huntIcon = game.add.sprite(305, 230, "huntIcon");
+	bugCatchIcon = game.add.sprite(355, 230, "bugCatchIcon");
+	questIcon = game.add.sprite(405, 230, "questIcon");
+	
+	var mineButton = game.add.sprite(0, 0, "mineButton");
+	var gatherButton = game.add.sprite(0, 50, "gatherButton");
+	var woodcutButton = game.add.sprite(0, 100, "woodcutButton");
+	var fishButton = game.add.sprite(0, 150, "fishButton");
+	var huntButton = game.add.sprite(0, 200, "huntButton");
+	var bugCatchButton = game.add.sprite(0, 250, "bugCatchButton");
+	
+	var trainingButton = game.add.sprite(450, 0, "trainingButton");
+	var itemsButton = game.add.sprite(450, 50, "itemsButton");
+	var equipsButton = game.add.sprite(450, 100, "equipsButton");
+	var questButton = game.add.sprite(450, 150, "questButton");
+	
+	actionButton = game.add.sprite(225, 200, "actionButton");
+	retryButton = game.add.sprite(225, 200, "retryButton");
+	collectButton = game.add.sprite(225, 200, "collectButton");
+	
+	//Setup buttons
+	buttonA1 = game.add.sprite(325, 80, "button");
+	buttonA2 = game.add.sprite(325, 100, "button");
+	buttonA3 = game.add.sprite(325, 120, "button");
+	buttonA4 = game.add.sprite(325, 140, "button");
+	buttonA5 = game.add.sprite(325, 160, "button");
+	buttonA6 = game.add.sprite(325, 180, "button");
+	buttonA7 = game.add.sprite(325, 200, "button");
+	
+	buttonB1 = game.add.sprite(365, 80, "button");
+	buttonB2 = game.add.sprite(365, 100, "button");
+	buttonB3 = game.add.sprite(365, 120, "button");
+	buttonB4 = game.add.sprite(365, 140, "button");
+	buttonB5 = game.add.sprite(365, 160, "button");
+	buttonB6 = game.add.sprite(365, 180, "button");
+	buttonB7 = game.add.sprite(365, 200, "button");
+	
+	buttonC1 = game.add.sprite(405, 80, "button");
+	buttonC2 = game.add.sprite(405, 100, "button");
+	buttonC3 = game.add.sprite(405, 120, "button");
+	buttonC4 = game.add.sprite(405, 140, "button");
+	buttonC5 = game.add.sprite(405, 160, "button");
+	buttonC6 = game.add.sprite(405, 180, "button");
+	buttonC7 = game.add.sprite(405, 200, "button");
+	
+	buttonArray = [[buttonA1, buttonA2, buttonA3, buttonA4, buttonA5, buttonA6, buttonA7], [buttonB1, buttonB2, buttonB3, buttonB4, buttonB5, buttonB6, buttonB7], [buttonC1, buttonC2, buttonC3, buttonC4, buttonC5, buttonC6, buttonC7]];
+	
+	for (i = 0; i < buttonArray.length; i++)
+	{
+		for (j = 0; j < buttonArray[i].length; j++)
+		{
+			buttonArray[i][j].events.onInputOver.add(buttonOverListener, this);
+			buttonArray[i][j].events.onInputDown.add(buttonDownListener, this);
+			buttonArray[i][j].events.onInputOut.add(buttonOutListener, this);
+			buttonArray[i][j].visible = false;
+			
+			buttonArray[i][j].index = j;
+		}
+	}
+	
+	mineButton.inputEnabled = true;
+	gatherButton.inputEnabled = true;
+	woodcutButton.inputEnabled = true;
+	fishButton.inputEnabled = true;
+	huntButton.inputEnabled = true;
+	bugCatchButton.inputEnabled = true;
+	
+	trainingButton.inputEnabled = true;
+	itemsButton.inputEnabled = true;
+	equipsButton.inputEnabled = true;
+	questButton.inputEnabled = true;
+	
+	actionButton.inputEnabled = true;
+	actionButton.visible = false;
+	retryButton.visible = false;
+	collectButton.visible = false;
+	
+	mineButton.events.onInputDown.add(mainButtonListener, this);
+	gatherButton.events.onInputDown.add(mainButtonListener, this);
+	woodcutButton.events.onInputDown.add(mainButtonListener, this);
+	fishButton.events.onInputDown.add(mainButtonListener, this);
+	huntButton.events.onInputDown.add(mainButtonListener, this);
+	bugCatchButton.events.onInputDown.add(mainButtonListener, this);
+	
+	trainingButton.events.onInputDown.add(mainButtonListener, this);
+	itemsButton.events.onInputDown.add(mainButtonListener, this);
+	equipsButton.events.onInputDown.add(mainButtonListener, this);
+	questButton.events.onInputDown.add(mainButtonListener, this);
+	
+	actionButton.events.onInputDown.add(actionButtonDownListener, this);
+	actionButton.events.onInputUp.add(actionButtonUpListener, this);
+	
+	collectButton.events.onInputDown.add(collectButtonListener, this);
+	retryButton.events.onInputDown.add(retryButtonListener, this);
+	
+	mineIcon.events.onInputDown.add(iconListener, this);
+	gatherIcon.events.onInputDown.add(iconListener, this);
+	woodcutIcon.events.onInputDown.add(iconListener, this);
+	fishIcon.events.onInputDown.add(iconListener, this);
+	huntIcon.events.onInputDown.add(iconListener, this);
+	bugCatchIcon.events.onInputDown.add(iconListener, this);
+	questIcon.events.onInputDown.add(iconListener, this);
+	
+	//Set up three main textfields
+	text1 = game.add.text(10, 305, "", {font: "12pt Arial", align: "left", wordWrap: true, wordWrapWidth: 230});
+	text2 = game.add.text(260, 305, "", {font: "12pt Arial", align: "left", wordWrap: true, wordWrapWidth: 130});
+	text3 = game.add.text(410, 305, "", {font: "12pt Arial", align: "left", wordWrap: true, wordWrapWidth: 130});
+	
+	//Set up gold and essence textfield
+	goldText = game.add.text(110, 275, "Gold: " + gold, {font: "12pt Arial", align: "left"});
+	essenceText = game.add.text(260, 275, "Essence: " + essence, {font: "12pt Arial", align: "left"});
+	
+	//Set up button descriptors
+	buttonText1 = game.add.text(320, 60, "", {font: "8pt Arial", align: "left"});
+	buttonText2 = game.add.text(360, 60, "", {font: "8pt Arial", align: "left"});
+	buttonText3 = game.add.text(400, 60, "", {font: "8pt Arial", align: "left"});
+	
+	//Set up 7 list texts
+	listText1 = game.add.text(180, 80, "", {font: "12pt Arial", align: "left"});
+	listText2 = game.add.text(180, 100, "", {font: "12pt Arial", align: "left"});
+	listText3 = game.add.text(180, 120, "", {font: "12pt Arial", align: "left"});
+	listText4 = game.add.text(180, 140, "", {font: "12pt Arial", align: "left"});
+	listText5 = game.add.text(180, 160, "", {font: "12pt Arial", align: "left"});
+	listText6 = game.add.text(180, 180, "", {font: "12pt Arial", align: "left"});
+	listText7 = game.add.text(180, 200, "", {font: "12pt Arial", align: "left"});
+	
+	listTextArray = [listText1, listText2, listText3, listText4, listText5, listText6, listText7];
+	
+	for (i = 0; i < listTextArray.length; i++)
+	{
+		listTextArray[i].inputEnabled = true;
+		listTextArray[i].index = i;
+		listTextArray[i].events.onInputOver.add(listTextOverListener, this);
+	}
+	
+	//Set up 7 amount texts
+	amountText1 = game.add.text(110, 80, "", {font: "12pt Arial", align: "left"});
+	amountText2 = game.add.text(110, 100, "", {font: "12pt Arial", align: "left"});
+	amountText3 = game.add.text(110, 120, "", {font: "12pt Arial", align: "left"});
+	amountText4 = game.add.text(110, 140, "", {font: "12pt Arial", align: "left"});
+	amountText5 = game.add.text(110, 160, "", {font: "12pt Arial", align: "left"});
+	amountText6 = game.add.text(110, 180, "", {font: "12pt Arial", align: "left"});
+	amountText7 = game.add.text(110, 200, "", {font: "12pt Arial", align: "left"});
+	
+	amountTextArray = [amountText1, amountText2, amountText3, amountText4, amountText5, amountText6, amountText7];
+	
+	//Makes backgrounds invisible
+	resetBG();
+	
+	//Call createItems and createEquipment to add icons, descriptions, stats, etc
+	createItems();
+	createEquipment();
+	finishCreatingItemsEquipment();
+	createMonsters();
+}
+
+
+function update() 
+{
+	
+}
+
+//Creation Functions
+function createItems()
+{
+	//Create items using item arrays. Create item master array
+	pickaxeItem1 = game.add.sprite(450, 200, "pickaxeItem1");
+	pickaxeItem2 = game.add.sprite(450, 200, "pickaxeItem2");
+	pickaxeItem3 = game.add.sprite(450, 200, "pickaxeItem3");
+	pickaxeItem4 = game.add.sprite(450, 200, "pickaxeItem4");
+	pickaxeItem5 = game.add.sprite(450, 200, "pickaxeItem5");
+	pickaxeItem6 = game.add.sprite(450, 200, "pickaxeItem6");
+	pickaxeItem7 = game.add.sprite(450, 200, "pickaxeItem7");
+	glovesItem1 = game.add.sprite(450, 200, "glovesItem1");
+	glovesItem2 = game.add.sprite(450, 200, "glovesItem2");
+	glovesItem3 = game.add.sprite(450, 200, "glovesItem3");
+	glovesItem4 = game.add.sprite(450, 200, "glovesItem4");
+	glovesItem5 = game.add.sprite(450, 200, "glovesItem5");
+	glovesItem6 = game.add.sprite(450, 200, "glovesItem6");
+	glovesItem7 = game.add.sprite(450, 200, "glovesItem7");
+	axeItem1 = game.add.sprite(450, 200, "axeItem1");
+	axeItem2 = game.add.sprite(450, 200, "axeItem2");
+	axeItem3 = game.add.sprite(450, 200, "axeItem3");
+	axeItem4 = game.add.sprite(450, 200, "axeItem4");
+	axeItem5 = game.add.sprite(450, 200, "axeItem5");
+	axeItem6 = game.add.sprite(450, 200, "axeItem6");
+	axeItem7 = game.add.sprite(450, 200, "axeItem7");
+	fishrodItem1 = game.add.sprite(450, 200, "fishrodItem1");
+	fishrodItem2 = game.add.sprite(450, 200, "fishrodItem2");
+	fishrodItem3 = game.add.sprite(450, 200, "fishrodItem3");
+	fishrodItem4 = game.add.sprite(450, 200, "fishrodItem4");
+	fishrodItem5 = game.add.sprite(450, 200, "fishrodItem5");
+	fishrodItem6 = game.add.sprite(450, 200, "fishrodItem6");
+	fishrodItem7 = game.add.sprite(450, 200, "fishrodItem7");
+	bowItem1 = game.add.sprite(450, 200, "bowItem1");
+	bowItem2 = game.add.sprite(450, 200, "bowItem2");
+	bowItem3 = game.add.sprite(450, 200, "bowItem3");
+	bowItem4 = game.add.sprite(450, 200, "bowItem4");
+	bowItem5 = game.add.sprite(450, 200, "bowItem5");
+	bowItem6 = game.add.sprite(450, 200, "bowItem6");
+	bowItem7 = game.add.sprite(450, 200, "bowItem7");
+	bugnetItem1 = game.add.sprite(450, 200, "bugnetItem1");
+	bugnetItem2 = game.add.sprite(450, 200, "bugnetItem2");
+	bugnetItem3 = game.add.sprite(450, 200, "bugnetItem3");
+	bugnetItem4 = game.add.sprite(450, 200, "bugnetItem4");
+	bugnetItem5 = game.add.sprite(450, 200, "bugnetItem5");
+	bugnetItem6 = game.add.sprite(450, 200, "bugnetItem6");
+	bugnetItem7 = game.add.sprite(450, 200, "bugnetItem7");
+	
+	monsterDrop1 = game.add.sprite(450, 200, "monsterDrop1");
+	monsterDrop2 = game.add.sprite(450, 200, "monsterDrop2");
+	monsterDrop3 = game.add.sprite(450, 200, "monsterDrop3");
+	monsterDrop4 = game.add.sprite(450, 200, "monsterDrop4");
+	monsterDrop5 = game.add.sprite(450, 200, "monsterDrop5");
+	monsterDrop6 = game.add.sprite(450, 200, "monsterDrop6");
+	
+	pickaxeItemArray = [pickaxeItem1, pickaxeItem2, pickaxeItem3, pickaxeItem4, pickaxeItem5, pickaxeItem6, pickaxeItem7];
+	glovesItemArray = [glovesItem1, glovesItem2, glovesItem3, glovesItem4, glovesItem5, glovesItem6, glovesItem7];
+	axeItemArray = [axeItem1, axeItem2, axeItem3, axeItem4, axeItem5, axeItem6, axeItem7];
+	fishrodItemArray = [fishrodItem1, fishrodItem2, fishrodItem3, fishrodItem4, fishrodItem5, fishrodItem6, fishrodItem7];
+	bowItemArray = [bowItem1, bowItem2, bowItem3, bowItem4, bowItem5, bowItem6, bowItem7];
+	bugnetItemArray = [bugnetItem1, bugnetItem2, bugnetItem3, bugnetItem4, bugnetItem5, bugnetItem6, bugnetItem7];
+	
+	itemMasterArray = [pickaxeItemArray, glovesItemArray, axeItemArray, fishrodItemArray, bowItemArray, bugnetItemArray];
+	
+	monsterDropArray = [monsterDrop1, monsterDrop2, monsterDrop3, monsterDrop4, monsterDrop5, monsterDrop6];
+}
+
+function createEquipment()
+{
+	//Create equipment using equipment arrays. Create equip master array
+	pickaxe1 = game.add.sprite(169, 60, "pickaxe1");
+	pickaxe2 = game.add.sprite(169, 60, "pickaxe2");
+	pickaxe3 = game.add.sprite(169, 60, "pickaxe3");
+	pickaxe4 = game.add.sprite(169, 60, "pickaxe4");
+	pickaxe5 = game.add.sprite(169, 60, "pickaxe5");
+	gloves1 = game.add.sprite(159, 150, "gloves1");
+	gloves2 = game.add.sprite(159, 150, "gloves2");
+	gloves3 = game.add.sprite(159, 150, "gloves3");
+	gloves4 = game.add.sprite(159, 150, "gloves4");
+	gloves5 = game.add.sprite(159, 150, "gloves5");
+	axe1 = game.add.sprite(169, 60, "axe1");
+	axe2 = game.add.sprite(169, 60, "axe2");
+	axe3 = game.add.sprite(169, 60, "axe3");
+	axe4 = game.add.sprite(169, 60, "axe4");
+	axe5 = game.add.sprite(169, 60, "axe5");
+	fishrod1 = game.add.sprite(169, 60, "fishrod1");
+	fishrod2 = game.add.sprite(169, 60, "fishrod2");
+	fishrod3 = game.add.sprite(169, 60, "fishrod3");
+	fishrod4 = game.add.sprite(169, 60, "fishrod4");
+	fishrod5 = game.add.sprite(169, 60, "fishrod5");
+	bow1 = game.add.sprite(139, 110, "bow1");
+	bow2 = game.add.sprite(139, 110, "bow2");
+	bow3 = game.add.sprite(139, 110, "bow3");
+	bow4 = game.add.sprite(139, 110, "bow4");
+	bow5 = game.add.sprite(139, 110, "bow5");
+	bugnet1 = game.add.sprite(169, 60, "bugnet1");
+	bugnet2 = game.add.sprite(169, 60, "bugnet2");
+	bugnet3 = game.add.sprite(169, 60, "bugnet3");
+	bugnet4 = game.add.sprite(169, 60, "bugnet4");
+	bugnet5 = game.add.sprite(169, 60, "bugnet5");
+	
+	sword1 = game.add.sprite(169, 60, "sword1");
+	
+	pickaxeArray = [pickaxe1, pickaxe2, pickaxe3, pickaxe4, pickaxe5];
+	glovesArray = [gloves1, gloves2, gloves3, gloves4, gloves5];
+	axeArray = [axe1, axe2, axe3, axe4, axe5];
+	fishrodArray = [fishrod1, fishrod2, fishrod3, fishrod4, fishrod5];
+	bowArray = [bow1, bow2, bow3, bow4, bow5];
+	bugnetArray = [bugnet1, bugnet2, bugnet3, bugnet4, bugnet5];
+	
+	swordArray = [sword1];
+
+	equipMasterArray = [pickaxeArray, glovesArray, axeArray, fishrodArray, bowArray, bugnetArray, swordArray];
+	
+	//Create equipment icons and their master array
+	pickaxeIcon1 = game.add.sprite(450, 200, "pickaxe1");
+	pickaxeIcon2 = game.add.sprite(450, 200, "pickaxe2");
+	pickaxeIcon3 = game.add.sprite(450, 200, "pickaxe3");
+	pickaxeIcon4 = game.add.sprite(450, 200, "pickaxe4");
+	pickaxeIcon5 = game.add.sprite(450, 200, "pickaxe5");
+	glovesIcon1 = game.add.sprite(450, 200, "gloves1");
+	glovesIcon2 = game.add.sprite(450, 200, "gloves2");
+	glovesIcon3 = game.add.sprite(450, 200, "gloves3");
+	glovesIcon4 = game.add.sprite(450, 200, "gloves4");
+	glovesIcon5 = game.add.sprite(450, 200, "gloves5");
+	axeIcon1 = game.add.sprite(450, 200, "axe1");
+	axeIcon2 = game.add.sprite(450, 200, "axe2");
+	axeIcon3 = game.add.sprite(450, 200, "axe3");
+	axeIcon4 = game.add.sprite(450, 200, "axe4");
+	axeIcon5 = game.add.sprite(450, 200, "axe5");
+	fishrodIcon1 = game.add.sprite(450, 200, "fishrod1");
+	fishrodIcon2 = game.add.sprite(450, 200, "fishrod2");
+	fishrodIcon3 = game.add.sprite(450, 200, "fishrod3");
+	fishrodIcon4 = game.add.sprite(450, 200, "fishrod4");
+	fishrodIcon5 = game.add.sprite(450, 200, "fishrod5");
+	bowIcon1 = game.add.sprite(450, 200, "bow1");
+	bowIcon2 = game.add.sprite(450, 200, "bow2");
+	bowIcon3 = game.add.sprite(450, 200, "bow3");
+	bowIcon4 = game.add.sprite(450, 200, "bow4");
+	bowIcon5 = game.add.sprite(450, 200, "bow5");
+	bugnetIcon1 = game.add.sprite(450, 200, "bugnet1");
+	bugnetIcon2 = game.add.sprite(450, 200, "bugnet2");
+	bugnetIcon3 = game.add.sprite(450, 200, "bugnet3");
+	bugnetIcon4 = game.add.sprite(450, 200, "bugnet4");
+	bugnetIcon5 = game.add.sprite(450, 200, "bugnet5");
+	
+	swordIcon1 = game.add.sprite(450, 200, "sword1");
+	
+	pickaxeIconArray = [pickaxeIcon1, pickaxeIcon2, pickaxeIcon3, pickaxeIcon4, pickaxeIcon5];
+	glovesIconArray = [glovesIcon1, glovesIcon2, glovesIcon3, glovesIcon4, glovesIcon5];
+	axeIconArray = [axeIcon1, axeIcon2, axeIcon3, axeIcon4, axeIcon5];
+	fishrodIconArray = [fishrodIcon1, fishrodIcon2, fishrodIcon3, fishrodIcon4, fishrodIcon5];
+	bowIconArray = [bowIcon1, bowIcon2, bowIcon3, bowIcon4, bowIcon5];
+	bugnetIconArray = [bugnetIcon1, bugnetIcon2, bugnetIcon3, bugnetIcon4, bugnetIcon5];
+	
+	swordIconArray = [swordIcon1];
+
+	equipIconMasterArray = [pickaxeIconArray, glovesIconArray, axeIconArray, fishrodIconArray, bowIconArray, bugnetIconArray, swordIconArray];
+	
+	//Sets first level of all equips to be crafted.
+	for(i = 0; i < equipMasterArray.length; i++)
+	{
+		for (j = 0; j < equipMasterArray[i].length; j++)
+		{
+			if(j == 0)
+			{
+				equipMasterArray[i][j].isCrafted = true;
+			}
+			
+			else
+			{
+				//Temporarily set to true for testing purposes
+				equipMasterArray[i][j].isCrafted = false;
+			}
+		}
+	}
+	
+	//Placeholder code. Defines names, descriptions, if it is crafted, and levels of equipment
+	sword1.name = "Small Dagger";
+	sword1.description1 = "sword desc 1";
+	sword1.description2 = "sword desc 2";
+	sword1.description3 = "sword desc 3";
+	
+	sword1.isCrafted = true;
+	sword1.level = 0;
+	sword1.attack = 1;
+}
+
+function finishCreatingItemsEquipment()
+{
+	//Equipment
+	for(i = 0; i < equipMasterArray.length; i++)
+	{
+		for (j = 0; j < equipMasterArray[i].length; j++)
+		{
+			//Makes all equipment invisible
+			equipMasterArray[i][j].visible = false;
+			
+			//Names equipment
+			if(i == 0)
+			{
+				equipMasterArray[i][j].name = "Pickaxe Lv " + eval(j+1);
+			}
+			
+			else if(i == 1)
+			{
+				equipMasterArray[i][j].name = "Gloves Lv " + eval(j+1);
+			}
+			
+			else if(i == 2)
+			{
+				equipMasterArray[i][j].name = "Axe Lv " + eval(j+1);
+			}
+			
+			else if(i == 3)
+			{
+				equipMasterArray[i][j].name = "Fishing Rod Lv " + eval(j+1);
+			}
+			
+			else if(i == 4)
+			{
+				equipMasterArray[i][j].name = "Bow Lv " + eval(j+1);
+			}
+			
+			else if(i == 5)
+			{
+				equipMasterArray[i][j].name = "Bug Net Lv " + eval(j+1);
+			}
+		}
+	}
+	
+	//Adds equip drops and equip drop chances from itemMasterArray to equipMasterArray, minus one because swords don't have drop chances
+	for(i = 0; i < equipMasterArray.length - 1; i++)
+	{
+		for (j = 0; j < equipMasterArray[i].length; j++)
+		{
+			equipMasterArray[i][j].equipDrops = [itemMasterArray[i][j], itemMasterArray[i][j+1], itemMasterArray[i][j+2]];
+			equipMasterArray[i][j].equipDropChances = [90, 99, 100];
+		}
+	}
+	
+	//Makes all equipment icons invisible
+	for(i = 0; i < equipIconMasterArray.length; i++)
+	{
+		for (j = 0; j < equipIconMasterArray[i].length; j++)
+		{
+			equipIconMasterArray[i][j].visible = false;
+		}
+	}
+	
+	//Items
+	for(i = 0; i < itemMasterArray.length; i++)
+	{
+		for (j = 0; j < itemMasterArray[i].length; j++)
+		{
+			//Makes all items invisible
+			itemMasterArray[i][j].visible = false;
+			
+			//Names items
+			if(i == 0)
+			{
+				itemMasterArray[i][j].name = "Ore Lv " + eval(j+1);
+			}
+			
+			else if(i == 1)
+			{
+				itemMasterArray[i][j].name = "Herbs Lv " + eval(j+1);
+			}
+			
+			else if(i == 2)
+			{
+				itemMasterArray[i][j].name = "Wood Lv " + eval(j+1);
+			}
+			
+			else if(i == 3)
+			{
+				itemMasterArray[i][j].name = "Fish Lv " + eval(j+1);
+			}
+			
+			else if(i == 4)
+			{
+				itemMasterArray[i][j].name = "Animal Lv " + eval(j+1);
+			}
+			
+			else if(i == 5)
+			{
+				itemMasterArray[i][j].name = "Bug Lv " + eval(j+1);
+			}
+			
+			//Gives all items an index
+			itemMasterArray[i][j].indexI = i;
+			itemMasterArray[i][j].indexJ = j;
+		}
+	}
+	
+	//Makes monster drops invisible and names them
+	for(i = 0; i < monsterDropArray.length; i++)
+	{
+		monsterDropArray[i].visible = false;
+		monsterDropArray[i].name = "Dung Lv " + eval(i+1);
+		monsterDropArray[i].indexI = 6;
+		monsterDropArray[i].indexJ = i;
+	}
+	
+	//Adds descriptions for the items
+	for(i = 0; i < itemMasterArray.length; i++)
+	{
+		for(j = 0; j < itemMasterArray[i].length; j++)
+		{
+			//First descriptions
+			if(i == 0)
+			{
+				itemMasterArray[i][j].description1 = "Ore mined from hitting a rock over and over with a pickaxe.";
+			}
+			
+			else if(i == 1)
+			{
+				itemMasterArray[i][j].description1 = "Herbs foraged from a bush in the forest.";
+			}
+			
+			else if(i == 2)
+			{
+				itemMasterArray[i][j].description1 = "Wood from a tree you chopped down with your axe.";
+			}
+			
+			else if(i == 3)
+			{
+				itemMasterArray[i][j].description1 = "A fish reeled in and caught from the deep ocean.";
+			}
+			
+			else if(i == 4)
+			{
+				itemMasterArray[i][j].description1 = "A poor animal hunted for its meat and materials.";
+			}
+			
+			else if(i == 5)
+			{
+				itemMasterArray[i][j].description1 = "Gross bugs you caught in your bug net. Disgusting.";
+			}
+			
+			//Second and third descriptions. Adds costs to items.
+			if(j == 0)
+			{
+				itemMasterArray[i][j].description2 = "Received from: \n" + equipMasterArray[i][j].name;
+				itemMasterArray[i][j].cost = j+1
+				itemMasterArray[i][j].description3 = "Sells for: \n" + itemMasterArray[i][j].cost + " gold";
+			}
+			
+			else if(j == 1)
+			{
+				itemMasterArray[i][j].description2 = "Received from: \n" + equipMasterArray[i][j-1].name + "\n" + equipMasterArray[i][j].name;
+				itemMasterArray[i][j].cost = j+1;
+				itemMasterArray[i][j].description3 = "Sells for: \n" + itemMasterArray[i][j].cost + " gold";
+			}
+			
+			else if(j == 2)
+			{
+				itemMasterArray[i][j].description2 = "Received from: \n" + equipMasterArray[i][j-2].name + "\n" + equipMasterArray[i][j-1].name + "\n" + equipMasterArray[i][j].name;
+				itemMasterArray[i][j].cost = j+3;
+				itemMasterArray[i][j].description3 = "Sells for: \n" + itemMasterArray[i][j].cost + " gold";
+			}
+			
+			else if(j == 3)
+			{
+				itemMasterArray[i][j].description2 = "Received from: \n" + equipMasterArray[i][j-2].name + "\n" + equipMasterArray[i][j-1].name + "\n" + equipMasterArray[i][j].name;
+				itemMasterArray[i][j].cost = j+7;
+				itemMasterArray[i][j].description3 = "Sells for: \n" + itemMasterArray[i][j].cost + " gold";
+			}
+			
+			else if(j == 4)
+			{
+				itemMasterArray[i][j].description2 = "Received from: \n" + equipMasterArray[i][j-2].name + "\n" + equipMasterArray[i][j-1].name + "\n" + equipMasterArray[i][j].name;
+				itemMasterArray[i][j].cost = j+16;
+				itemMasterArray[i][j].description3 = "Sells for: \n" + itemMasterArray[i][j].cost + " gold";
+			}
+			
+			else if(j == 5)
+			{
+				itemMasterArray[i][j].description2 = "Received from: \n" + equipMasterArray[i][j-2].name + "\n" + equipMasterArray[i][j-1].name;
+				itemMasterArray[i][j].cost = j+45;
+				itemMasterArray[i][j].description3 = "Sells for: \n" + itemMasterArray[i][j].cost + " gold";
+			}
+			
+			else if(j == 6)
+			{
+				itemMasterArray[i][j].description2 = "Received from: \n" + equipMasterArray[i][j-2].name;
+				itemMasterArray[i][j].cost = j+144;
+				itemMasterArray[i][j].description3 = "Sells for: \n" + itemMasterArray[i][j].cost + " gold";
+			}
+		}
+	}
+	
+	//Adds descriptions to monster drops
+	for (i = 0; i < monsterDropArray.length; i++)
+	{
+		monsterDropArray[i].description1 = "Dung obtained by pillaging a monster's nest. Useful for crafting and training.";
+		monsterDropArray[i].description2 = "Received from:\nMonster Level " + eval(monsterDropArray[i].indexJ+1);
+	}
+	
+	monsterDropArray[0].cost = 1;
+	monsterDropArray[1].cost = 5;
+	monsterDropArray[2].cost = 20;
+	monsterDropArray[3].cost = 100;
+	monsterDropArray[4].cost = 700;
+	monsterDropArray[5].cost = 3000;
+	monsterDropArray[0].description3 = "Sells for:\n" + monsterDropArray[0].cost + " essence";
+	monsterDropArray[1].description3 = "Sells for:\n" + monsterDropArray[1].cost + " essence";
+	monsterDropArray[2].description3 = "Sells for:\n" + monsterDropArray[2].cost + " essence";
+	monsterDropArray[3].description3 = "Sells for:\n" + monsterDropArray[3].cost + " essence";
+	monsterDropArray[4].description3 = "Sells for:\n" + monsterDropArray[4].cost + " essence";
+	monsterDropArray[5].description3 = "Sells for:\n" + monsterDropArray[5].cost + " essence";
+	
+	//Adds descriptions to equipment, but not swords
+	for(i = 0; i < equipMasterArray.length - 1; i++)
+	{
+		for (j = 0; j < equipMasterArray[i].length; j++)
+		{	
+			var c;
+			
+			//First descriptions
+			if(i == 0)
+			{
+				equipMasterArray[i][j].description1 = "A tool to harvest ore from rocks.";
+				c = i;
+			}
+			
+			else if(i == 1)
+			{
+				equipMasterArray[i][j].description1 = "Gloves that protect your hands while foraging.";
+				c = i;
+			}
+			
+			else if(i == 2)
+			{
+				equipMasterArray[i][j].description1 = "An axe used to chop down trees.";
+				c = i;
+			}
+			
+			else if(i == 3)
+			{
+				equipMasterArray[i][j].description1 = "Rod, line, and bait used to lure and catch fish.";
+				c = i;
+			}
+			
+			else if(i == 4)
+			{
+				equipMasterArray[i][j].description1 = "An efficient hunting tool used to kill from far away.";
+				c = i;
+			}
+			
+			else if(i == 5)
+			{
+				equipMasterArray[i][j].description1 = "State of the art bug nets used to capture insects.";
+				c = -1;
+			}
+			
+			//Second and third descriptions. Adds required to craft
+			if(j == 0)
+			{
+				equipMasterArray[i][j].description2 = "Drops: \n" + itemMasterArray[i][j].name + "\n" + itemMasterArray[i][j+1].name + "\n" + itemMasterArray[i][j+2].name;
+				equipMasterArray[i][j].description3 = "Required to craft:\nN/A";
+			}
+			
+			else if(j == 1)
+			{
+				equipMasterArray[i][j].description2 = "Drops: \n" + itemMasterArray[i][j].name + "\n" + itemMasterArray[i][j+1].name + "\n" + itemMasterArray[i][j+2].name;
+				equipMasterArray[i][j].description3 = "Required to craft:\n" + "20x " + itemMasterArray[i][j-1].name + "\n3x " + itemMasterArray[c+1][j].name + "\n1x " + monsterDropArray[j-1].name;
+				equipMasterArray[i][j].needs = [20, itemMasterArray[i][j-1], 3, itemMasterArray[c+1][j], 1, monsterDropArray[j-1]];
+			}
+			
+			else if(j == 2)
+			{
+				equipMasterArray[i][j].description2 = "Drops: \n" + itemMasterArray[i][j].name + "\n" + itemMasterArray[i][j+1].name + "\n" + itemMasterArray[i][j+2].name;
+				equipMasterArray[i][j].description3 = "Required to craft:\n" + "20x " + itemMasterArray[i][j-1].name + "\n3x " + itemMasterArray[c+1][j].name + "\n1x " + monsterDropArray[j-1].name;
+				equipMasterArray[i][j].needs = [20, itemMasterArray[i][j-1], 3, itemMasterArray[c+1][j], 1, monsterDropArray[j-1]];
+			}
+			
+			else if(j == 3)
+			{
+				equipMasterArray[i][j].description2 = "Drops: \n" + itemMasterArray[i][j].name + "\n" + itemMasterArray[i][j+1].name + "\n" + itemMasterArray[i][j+2].name;
+				equipMasterArray[i][j].description3 = "Required to craft:\n" + "20x " + itemMasterArray[i][j-1].name + "\n3x " + itemMasterArray[c+1][j].name + "\n1x " + monsterDropArray[j-1].name;
+				equipMasterArray[i][j].needs = [20, itemMasterArray[i][j-1], 3, itemMasterArray[c+1][j], 1, monsterDropArray[j-1]];
+			}
+			
+			else if(j == 4)
+			{
+				equipMasterArray[i][j].description2 = "Drops: \n" + itemMasterArray[i][j].name + "\n" + itemMasterArray[i][j+1].name + "\n" + itemMasterArray[i][j+2].name;
+				equipMasterArray[i][j].description3 = "Required to craft:\n" + "20x " + itemMasterArray[i][j-1].name + "\n3x " + itemMasterArray[c+1][j].name + "\n1x " + monsterDropArray[j-1].name;
+				equipMasterArray[i][j].needs = [20, itemMasterArray[i][j-1], 3, itemMasterArray[c+1][j], 1, monsterDropArray[j-1]];
+			}
+		}
+	}
+}
+
+function createMonsters()
+{
+	//Setup monsters
+	monster1 = game.add.sprite(250, 50, "monster1");
+	monster1.visible = false;
+	monster1.currentHealth = 100;
+	monster1.maxHealth = 100;
+	monster1.attack = 2;
+	monster1.attackSpeed = 2;
+	monster1.drop = monsterDrop1;
+	//monster1.attack = 50;
+}
+
+//Listener Functions
+function mainButtonListener(a)
+{
+	resetBG();
+	resetMainTexts();
+	resetIcon();
+	resetAmountAndListTexts();
+	resetButtons();
+	resetButtonDescriptions();
+	resetMonster();
+	resetPlayerAndMonsterHealth();
+	endTimers();
+	
+	//Makes all equipment invisible again
+	for(i = 0; i < equipMasterArray.length; i++)
+	{
+		for (j = 0; j < equipMasterArray[i].length; j++)
+		{
+			equipMasterArray[i][j].visible = false;
+		}
+	}
+	
+	//Variable that determines first index in equips array.
+	var b;
+	
+	//Switch cases determine if farm BG is chosen, or training, items, equips, or quest. If farm BG is chosen, action button is enabled.
+	switch (a.key)
+	{
+		case "mineButton":
+			actionButton.inputEnabled = true;
+			actionButton.visible = true;
+			
+			mineBG.visible = true;
+			currentArea = "mine";
+			b = 0;
+			
+			currentEquip = equipMasterArray[b][currentEquipLevels[b]];
+			currentEquip.visible = true;
+			
+			break;
+			
+		case "gatherButton":
+			actionButton.inputEnabled = true;
+			actionButton.visible = true;
+			
+			gatherBG.visible = true;
+			currentArea = "gather";
+			b = 1;
+			
+			currentEquip = equipMasterArray[b][currentEquipLevels[b]];
+			currentEquip.visible = true;
+			
+			break;
+			
+		case "woodcutButton":
+			actionButton.inputEnabled = true;
+			actionButton.visible = true;
+			
+			woodcutBG.visible = true;
+			currentArea = "woodcut";
+			b = 2;
+			
+			currentEquip = equipMasterArray[b][currentEquipLevels[b]];
+			currentEquip.visible = true;
+			
+			break;
+			
+		case "fishButton":
+			actionButton.inputEnabled = true;
+			actionButton.visible = true;
+			
+			fishBG.visible = true;
+			currentArea = "fish";
+			b = 3;
+			
+			currentEquip = equipMasterArray[b][currentEquipLevels[b]];
+			currentEquip.visible = true;
+			
+			break;
+			
+		case "huntButton":
+			actionButton.inputEnabled = true;
+			actionButton.visible = true;
+			
+			huntBG.visible = true;
+			currentArea = "hunt";
+			b = 4;
+			
+			currentEquip = equipMasterArray[b][currentEquipLevels[b]];
+			currentEquip.visible = true;
+			
+			break;
+			
+		case "bugCatchButton":
+			actionButton.inputEnabled = true;
+			actionButton.visible = true;
+			
+			bugCatchBG.visible = true;
+			currentArea = "bugCatch";
+			b = 5;
+			
+			currentEquip = equipMasterArray[b][currentEquipLevels[b]];
+			currentEquip.visible = true;
+			
+			break;
+			
+		case "trainingButton":
+			actionButton.inputEnabled = false;
+			actionButton.visible = false;
+			
+			trainingBG.visible = true;
+			currentArea = "training";
+			
+			goldText.visible = true;
+			essenceText.visible = true;
+			
+			listText1.text = "Lvl up max health";
+			listText2.text = "Lvl up attack";
+			listText3.text = "Lvl up defense";
+			listText4.text = "Lvl up attack speed";
+			buttonB1.visible = true;
+			buttonB2.visible = true;
+			buttonB3.visible = true;
+			buttonB4.visible = true;
+			
+			buttonB1.inputEnabled = true;
+			buttonB2.inputEnabled = true;
+			buttonB3.inputEnabled = true;
+			buttonB4.inputEnabled = true;
+			
+			text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + baseAttack + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+			
+			break;
+			
+		case "itemsButton":
+			actionButton.inputEnabled = false;
+			actionButton.visible = false;
+			
+			itemsBG.visible = true;
+			currentArea = "items";
+	
+			mineIcon.visible = true;
+			gatherIcon.visible = true;
+			woodcutIcon.visible = true;
+			fishIcon.visible = true;
+			huntIcon.visible = true;
+			bugCatchIcon.visible = true;
+			questIcon.visible = true;
+			
+			mineIcon.inputEnabled = true;
+			gatherIcon.inputEnabled = true;
+			woodcutIcon.inputEnabled = true;
+			fishIcon.inputEnabled = true;
+			huntIcon.inputEnabled = true;
+			bugCatchIcon.inputEnabled = true;
+			questIcon.inputEnabled = true;
+			
+			goldText.visible = true;
+			essenceText.visible = true;
+			
+			break;
+			
+		case "equipsButton":
+			actionButton.inputEnabled = false;
+			actionButton.visible = false;
+			
+			equipsBG.visible = true;
+			currentArea = "equips";
+			
+			mineIcon.visible = true;
+			gatherIcon.visible = true;
+			woodcutIcon.visible = true;
+			fishIcon.visible = true;
+			huntIcon.visible = true;
+			bugCatchIcon.visible = true;
+			questIcon.visible = true;
+			
+			mineIcon.inputEnabled = true;
+			gatherIcon.inputEnabled = true;
+			woodcutIcon.inputEnabled = true;
+			fishIcon.inputEnabled = true;
+			huntIcon.inputEnabled = true;
+			bugCatchIcon.inputEnabled = true;
+			questIcon.inputEnabled = true;
+			
+			goldText.visible = true;
+			essenceText.visible = true;
+			
+			break;
+			
+		case "questButton":
+			actionButton.inputEnabled = true;
+			actionButton.visible = true;
+			
+			questBG.visible = true;
+			currentArea = "quest";
+			b = 6;
+			
+			currentEquip = equipMasterArray[b][currentEquipLevels[b]];
+			currentEquip.visible = true;
+			
+			currentMonster = monster1;
+			currentMonster.visible = true;
+			
+			goldText.visible = true;
+			essenceText.visible = true;
+			
+			text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + eval(baseAttack + currentEquip.attack) + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+			text2.text = "Monster Health: \n" + currentMonster.currentHealth + "/" + currentMonster.maxHealth;
+			break;
+	}
+}
+
+function actionButtonDownListener(a)
+{
+	if (currentArea == "mine" || currentArea == "woodcut" || currentArea == "bugCatch")
+	{
+		currentEquip.angle = 30;
+		currentEquip.x = 219;
+		currentEquip.y = 73;
+	}
+	
+	else if (currentArea == "gather")
+	{
+		currentEquip.scale.set(1.2, 1.2);
+	}
+	
+	else if (currentArea == "hunt")
+	{
+		currentEquip.x = 135;
+	}
+	
+	else if (currentArea == "fish")
+	{
+		currentEquip.y = 65;
+	}
+}
+
+function actionButtonUpListener(a)
+{
+	if (currentArea == "mine" || currentArea == "woodcut" || currentArea == "bugCatch")
+	{
+		currentEquip.angle = 0;
+		currentEquip.x = 169;
+		currentEquip.y = 60;
+		
+		getNewFarmItem();
+	}
+	
+	else if (currentArea == "gather")
+	{
+		currentEquip.scale.set(1, 1);
+		
+		getNewFarmItem();
+	}
+	
+	else if (currentArea == "hunt")
+	{
+		currentEquip.x = 139;
+		
+		getNewFarmItem();
+	}
+	
+	else if (currentArea == "fish")
+	{
+		currentEquip.y = 60;
+		
+		getNewFarmItem();
+	}
+	
+	else if (currentArea == "quest")
+	{
+		startBattle();
+	}
+}
+
+function iconListener(a)
+{
+	resetMainTexts();
+	resetIcon();
+	resetAmountAndListTexts();
+	resetButtons();
+	resetButtonDescriptions();
+	
+	//Determines first index in inventory or equip master array
+	var b;
+	
+	if (a.key == "mineIcon") {b = 0;iconIndex = b;}
+	else if (a.key == "gatherIcon") {b = 1;iconIndex = b;}
+	else if (a.key == "woodcutIcon") {b = 2;iconIndex = b;}
+	else if (a.key == "fishIcon") {b = 3;iconIndex = b;}
+	else if (a.key == "huntIcon") {b = 4;iconIndex = b;}
+	else if (a.key == "bugCatchIcon") {b = 5;iconIndex = b;}
+	else if (a.key == "questIcon") {b = 6;iconIndex = b;}
+	
+	//Checks if items or equips are chosen, and then populates seven list textfields
+	if (currentArea == "items")
+	{
+		buttonText1.text = "Sell 1";
+		buttonText2.text = "Sell 10";
+		buttonText3.text = "Sell All";
+		
+		//Checks if b < 6, then we are in a farm page. If it is >6, we are looking at monster drops
+		if (b < 6)
+		{
+			for (i = 0; i < itemMasterArray[b].length; i++)
+			{
+				amountTextArray[i].text = inventory[b][i];
+				listTextArray[i].text = itemMasterArray[b][i].name;
+				
+				buttonArray[0][i].visible = true;
+				buttonArray[1][i].visible = true;
+				buttonArray[2][i].visible = true;
+				
+				buttonArray[0][i].inputEnabled = true;
+				buttonArray[1][i].inputEnabled = true;
+				buttonArray[2][i].inputEnabled = true;
+			}
+		}
+		
+		else
+		{
+			for (i = 0; i < monsterDropArray.length; i++)
+			{
+				amountTextArray[i].text = inventory[b][i];
+				listTextArray[i].text = monsterDropArray[i].name;
+				
+				buttonArray[0][i].visible = true;
+				buttonArray[1][i].visible = true;
+				buttonArray[2][i].visible = true;
+				
+				buttonArray[0][i].inputEnabled = true;
+				buttonArray[1][i].inputEnabled = true;
+				buttonArray[2][i].inputEnabled = true;
+			}
+		}
+	}
+	
+	else if (currentArea == "equips")
+	{
+		//Checks if b < 6, then we are in a farm page. If it is >6, we are looking at weapons
+		if (b < 6)
+		{
+			buttonText1.text = "Craft";
+			buttonText2.text = "Equip";
+			
+			for (i = 0; i < equipMasterArray[b].length; i++)
+			{
+				listTextArray[i].text = equipMasterArray[b][i].name;
+				
+				buttonArray[0][i].visible = true;
+				buttonArray[1][i].visible = true;
+				
+				buttonArray[0][i].inputEnabled = true;
+				buttonArray[1][i].inputEnabled = true;
+			}
+		}
+		
+		else
+		{
+			buttonText1.text = "Craft";
+			buttonText2.text = "Equip";
+			buttonText3.text = "Upgrade";
+			
+			for (i = 0; i < equipMasterArray[b].length; i++)
+			{
+				amountTextArray[i].text = "Level " + equipMasterArray[b][i].level;
+				listTextArray[i].text = equipMasterArray[b][i].name;
+				
+				buttonArray[0][i].visible = true;
+				buttonArray[1][i].visible = true;
+				buttonArray[2][i].visible = true;
+				
+				buttonArray[0][i].inputEnabled = true;
+				buttonArray[1][i].inputEnabled = true;
+				buttonArray[2][i].inputEnabled = true;
+			}
+		}
+	}
+}
+
+function listTextOverListener(a)
+{
+	//Makes sure to make icon invisible again before making it visible
+	resetIcon();
+	
+	if (currentArea == "items")
+	{
+		//Checks if we are looking at farm drops or monster drops
+		if (iconIndex < 6)
+		{
+			text1.setText(itemMasterArray[iconIndex][a.index].description1);
+			text2.setText(itemMasterArray[iconIndex][a.index].description2);
+			text3.setText(itemMasterArray[iconIndex][a.index].description3);
+			
+			currentIcon = itemMasterArray[iconIndex][a.index];
+			currentIcon.visible = true;
+		}
+		 
+		else
+		{
+			text1.setText(monsterDropArray[a.index].description1);
+			text2.setText(monsterDropArray[a.index].description2);
+			text3.setText(monsterDropArray[a.index].description3);
+			
+			currentIcon = monsterDropArray[a.index];
+			currentIcon.visible = true;
+		}
+	}
+	
+	else if (currentArea == "equips")
+	{
+		text1.setText(equipMasterArray[iconIndex][a.index].description1);
+		text2.setText(equipMasterArray[iconIndex][a.index].description2);
+		text3.setText(equipMasterArray[iconIndex][a.index].description3);
+		
+		currentIcon = equipIconMasterArray[iconIndex][a.index];
+		currentIcon.visible = true;
+	}
+	
+	else if (currentArea == "training")
+	{
+		text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + baseAttack + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+		
+		if (a.index == 0)
+		{
+			text3.text = "Costs:\n" + healthCost(maxHealth) + " gold";
+			text2.text = "Spend gold to level up your max health.";
+		}
+		else if (a.index == 1)
+		{
+			text3.text = "Costs:\n" + attackCost(baseAttack) + " gold";
+			text2.text = "Spend gold to level up your attack.";
+		}
+		else if (a.index == 2)
+		{
+			text3.text = "Costs:\n" + defenseCost(baseDefense) + " gold";
+			text2.text = "Spend gold to level up your defense.";
+		}
+		else if (a.index == 3)
+		{
+			text3.text = "Costs:\n" + attackSpeedCost(baseAttackSpeed) + " gold";
+			text2.text = "Spend gold to level up your attack speed.";
+		}
+	}
+}
+
+function buttonOverListener(a)
+{
+	//Makes sure to make icon invisible again before making it visible
+	resetIcon();
+	
+	if (currentArea == "items")
+	{
+		//Checks if we are looking at farm drops or monster drops
+		if (iconIndex < 6)
+		{
+			text1.setText(itemMasterArray[iconIndex][a.index].description1);
+			text2.setText(itemMasterArray[iconIndex][a.index].description2);
+			text3.setText(itemMasterArray[iconIndex][a.index].description3);
+			
+			currentIcon = itemMasterArray[iconIndex][a.index];
+			currentIcon.visible = true;
+		}
+		 
+		else
+		{
+			text1.setText(monsterDropArray[a.index].description1);
+			text2.setText(monsterDropArray[a.index].description2);
+			text3.setText(monsterDropArray[a.index].description3);
+			
+			currentIcon = monsterDropArray[a.index];
+			currentIcon.visible = true;
+		}
+	}
+	
+	else if (currentArea == "equips")
+	{
+		text1.setText(equipMasterArray[iconIndex][a.index].description1);
+		text2.setText(equipMasterArray[iconIndex][a.index].description2);
+		text3.setText(equipMasterArray[iconIndex][a.index].description3);
+		
+		currentIcon = equipIconMasterArray[iconIndex][a.index];
+		currentIcon.visible = true;
+	}
+	
+	else if (currentArea == "training")
+	{
+		text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + baseAttack + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+		
+		if (a.index == 0)
+		{
+			text3.text = "Costs:\n" + healthCost(maxHealth) + " gold";
+			text2.text = "Spend gold to level up your max health.";
+		}
+		else if (a.index == 1)
+		{
+			text3.text = "Costs:\n" + attackCost(baseAttack) + " gold";
+			text2.text = "Spend gold to level up your attack.";
+		}
+		else if (a.index == 2)
+		{
+			text3.text = "Costs:\n" + defenseCost(baseDefense) + " gold";
+			text2.text = "Spend gold to level up your defense.";
+		}
+		else if (a.index == 3)
+		{
+			text3.text = "Costs:\n" + attackSpeedCost(baseAttackSpeed) + " gold";
+			text2.text = "Spend gold to level up your attack speed.";
+		}
+	}
+	
+	a.alpha = 0.5;
+}
+
+function buttonOutListener(a)
+{
+	a.alpha = 1.0;
+}
+
+function buttonDownListener(a)
+{
+	//b determines which button is pressed, either the first or second or third
+	var b;
+	
+	if (buttonArray[0].indexOf(a) > -1) {b = 0;}
+	else if (buttonArray[1].indexOf(a) > -1) {b = 1;}
+	else if (buttonArray[2].indexOf(a) > -1) {b = 2;}
+	
+	//c determines the index of the button that was pressed
+	var c = buttonArray[b].indexOf(a);
+	
+	//Checks if items or equips are chosen, then either sells items or crafts/equips/upgrades equipment.
+	if (currentArea == "items")
+	{
+		//Setup switch cases for the buttons (different between farm items and quest items)
+		//If icon index is less than 6, then we are looking at farm.
+		if (iconIndex < 6)
+		{
+			switch (b)
+			{
+				case 0:
+					if (inventory[iconIndex][c] > 0)
+					{
+						inventory[iconIndex][c] -= 1;
+						amountTextArray[c].text = inventory[iconIndex][c];
+						
+						gold += itemMasterArray[iconIndex][c].cost;
+						goldText.text = "Gold: " + gold;
+						
+						text1.text = "Sold!";
+					}
+				
+					else
+					{
+						text1.text = "Not enough " + itemMasterArray[iconIndex][c].name + " to sell!";
+					}
+				
+					break;
+			
+				case 1:
+					if (inventory[iconIndex][c] > 10)
+					{
+						inventory[iconIndex][c] -= 10;
+						amountTextArray[c].text = inventory[iconIndex][c];
+						
+						gold += 10*itemMasterArray[iconIndex][c].cost;
+						goldText.text = "Gold: " + gold;
+					
+						text1.text = "Sold!";
+					}
+				
+					else if (inventory[iconIndex][c] > 0)
+					{
+						for (i = 0; i < inventory[iconIndex][c]; i++)
+						{
+							gold += itemMasterArray[iconIndex][c].cost;
+						}
+						
+						inventory[iconIndex][c] = 0;
+						amountTextArray[c].text = inventory[iconIndex][c];
+						
+						goldText.text = "Gold: " + gold;
+						
+						text1.text = "Sold!";
+					}
+				
+					else
+					{
+						text1.text = "Not enough " + itemMasterArray[iconIndex][c].name + " to sell!";
+					}
+				
+					break;
+					
+				case 2:
+					if (inventory[iconIndex][c] > 0)
+					{
+						for (i = 0; i < inventory[iconIndex][c]; i++)
+						{
+							gold += itemMasterArray[iconIndex][c].cost;
+						}
+					
+						inventory[iconIndex][c] = 0;
+						amountTextArray[c].text = inventory[iconIndex][c];
+						
+						goldText.text = "Gold: " + gold;
+						
+						text1.text = "Sold!";
+					}
+					
+				else
+				{
+					text1.text = "Not enough " + itemMasterArray[iconIndex][c].name + " to sell!";
+				}
+				
+				break;
+			}
+		}
+		//Sell quest items for essence
+		else
+		{
+			switch (b)
+			{
+				case 0:
+					if (inventory[iconIndex][c] > 0)
+					{
+						inventory[iconIndex][c] -= 1;
+						amountTextArray[c].text = inventory[iconIndex][c];
+						
+						essence += monsterDropArray[c].cost;
+						essenceText.text = "Essence: " + essence;
+						
+						text1.text = "Sold!";
+					}
+				
+					else
+					{
+						text1.text = "Not enough " + itemMasterArray[iconIndex][c].name + " to sell!";
+					}
+				
+					break;
+			
+				case 1:
+					if (inventory[iconIndex][c] > 10)
+					{
+						inventory[iconIndex][c] -= 10;
+						amountTextArray[c].text = inventory[iconIndex][c];
+						
+						essence += 10*monsterDropArray[c].cost;
+						essenceText.text = "Essence: " + essence;
+					
+						text1.text = "Sold!";
+					}
+				
+					else if (inventory[iconIndex][c] > 0)
+					{
+						for (i = 0; i < inventory[iconIndex][c]; i++)
+						{
+							essence += monsterDropArray[c].cost;
+						}
+						
+						inventory[iconIndex][c] = 0;
+						amountTextArray[c].text = inventory[iconIndex][c];
+						
+						essenceText.text = "Essence: " + essence;
+						
+						text1.text = "Sold!";
+					}
+				
+					else
+					{
+						text1.text = "Not enough " + itemMasterArray[iconIndex][c].name + " to sell!";
+					}
+				
+					break;
+					
+				case 2:
+					if (inventory[iconIndex][c] > 0)
+					{
+						for (i = 0; i < inventory[iconIndex][c]; i++)
+						{
+							essence += monsterDropArray[c].cost;
+						}
+					
+						inventory[iconIndex][c] = 0;
+						amountTextArray[c].text = inventory[iconIndex][c];
+						
+						essenceText.text = "Essence: " + essence;
+						
+						text1.text = "Sold!";
+					}
+					
+				else
+				{
+					text1.text = "Not enough " + monsterDropArray[c].name + " to sell!";
+				}
+				
+				break;
+			}
+		}
+	}
+	
+	else if (currentArea == "equips")
+	{
+		//Setup switch cases for buttons
+		switch (b)
+		{
+			case 0:
+				if (equipMasterArray[iconIndex][c].isCrafted)
+				{
+					text1.text = equipMasterArray[iconIndex][c].name + " is crafted already!";
+				}
+				
+				else
+				{
+					//Code to craft new equipment. Checks if inventory has required items
+					var check1, check2, check3;
+					
+					if (inventory[equipMasterArray[iconIndex][c].needs[1].indexI][equipMasterArray[iconIndex][c].needs[1].indexJ] > equipMasterArray[iconIndex][c].needs[0])
+					{check1 = true;}else{check1 = false;}
+					
+					if (inventory[equipMasterArray[iconIndex][c].needs[3].indexI][equipMasterArray[iconIndex][c].needs[3].indexJ] > equipMasterArray[iconIndex][c].needs[2])
+					{check2 = true;}else{check2 = false;}
+					
+					if (inventory[equipMasterArray[iconIndex][c].needs[5].indexI][equipMasterArray[iconIndex][c].needs[5].indexJ] > equipMasterArray[iconIndex][c].needs[4])
+					{check3 = true;}else{check3 = false;}
+					
+					//If inventory has enough, remove items from inventory and craft equip
+					if (check1 && check2 && check3)
+					{
+						//Start here
+						text1.text = "Crafted!";
+						
+						inventory[equipMasterArray[iconIndex][c].needs[1].indexI][equipMasterArray[iconIndex][c].needs[1].indexJ] -= equipMasterArray[iconIndex][c].needs[0];
+						inventory[equipMasterArray[iconIndex][c].needs[3].indexI][equipMasterArray[iconIndex][c].needs[3].indexJ] -= equipMasterArray[iconIndex][c].needs[2];
+						inventory[equipMasterArray[iconIndex][c].needs[5].indexI][equipMasterArray[iconIndex][c].needs[5].indexJ] -= equipMasterArray[iconIndex][c].needs[4];
+						
+						equipMasterArray[iconIndex][c].isCrafted = true;
+					}
+					//If inventory doesn't have enough, inform player. Check1-3 texts determine what is needed
+					else
+					{
+						var check1Text, check2Text, check3Text;
+						//Don't use iconIndex for inventories
+						if (check1 == false)
+						{
+							check1Text = eval(equipMasterArray[iconIndex][c].needs[0] - inventory[equipMasterArray[iconIndex][c].needs[1].indexI][equipMasterArray[iconIndex][c].needs[1].indexJ])
+						}else{check1Text = 0;}
+						
+						if (check2 == false)
+						{
+							check2Text = eval(equipMasterArray[iconIndex][c].needs[2] - inventory[equipMasterArray[iconIndex][c].needs[3].indexI][equipMasterArray[iconIndex][c].needs[3].indexJ])
+						}else{check2Text = 0;}
+						
+						if (check3 == false)
+						{
+							check3Text = eval(equipMasterArray[iconIndex][c].needs[4] - inventory[equipMasterArray[iconIndex][c].needs[5].indexI][equipMasterArray[iconIndex][c].needs[5].indexJ])
+						}else{check3Text = 0;}
+						
+						text1.text = "Not enough materials! Need:\n" + check1Text + " more " + equipMasterArray[iconIndex][c].needs[1].name + "\n" + check2Text + " more " + equipMasterArray[iconIndex][c].needs[3].name + "\n" + check3Text + " more " + equipMasterArray[iconIndex][c].needs[5].name;
+					}
+				}
+				
+				break;
+			
+			case 1:
+				if (equipMasterArray[iconIndex][c].isCrafted)
+				{
+					text1.text = equipMasterArray[iconIndex][c].name + " equipped!";
+					currentEquipLevels[iconIndex] = c;
+				}
+				
+				else
+				{
+					text1.text = "You need to craft the " + equipMasterArray[iconIndex][c].name + " first!";
+				}
+				break;
+			
+			case 2:
+				break;
+		}
+	}
+	
+	else if (currentArea == "training")
+	{
+		//Spends gold to level up base stats
+		text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + baseAttack + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+		
+		if (a.index == 0)
+		{
+			if (gold >= healthCost(maxHealth))
+			{
+				gold -= healthCost(maxHealth)
+				goldText.text = "Gold: " + gold;
+				
+				maxHealth += 1;
+				currentHealth = maxHealth
+				text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + baseAttack + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+				text2.text = "Upgraded!";
+			}
+			else
+			{
+				text2.text = "Not enough gold to upgrade!";
+			}
+			text3.text = "Costs:\n" + healthCost(maxHealth) + " gold";
+		}
+		else if (a.index == 1)
+		{
+			if (gold >= attackCost(baseAttack))
+			{
+				gold -= attackCost(baseAttack);
+				goldText.text = "Gold: " + gold;
+				
+				baseAttack += 1;
+				text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + baseAttack + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+				text2.text = "Upgraded!";
+			}
+			else
+			{
+				text2.text = "Not enough gold to upgrade!";
+			}
+			text3.text = "Costs:\n" + attackCost(baseAttack) + " gold";
+		}
+		else if (a.index == 2)
+		{
+			if (gold >= defenseCost(baseDefense))
+			{
+				gold -= defenseCost(baseDefense);
+				goldText.text = "Gold: " + gold;
+				
+				baseDefense += 1;
+				text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + baseAttack + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+				text2.text = "Upgraded!";
+			}
+			else
+			{
+				text2.text = "Not enough gold to upgrade!";
+			}
+			text3.text = "Costs:\n" + defenseCost(baseDefense) + " gold";
+		}
+		else if (a.index == 3)
+		{
+			if (gold >= attackSpeedCost(baseAttackSpeed))
+			{
+				gold -= attackSpeedCost(baseAttackSpeed);
+				goldText.text = "Gold: " + gold;
+				
+				baseAttackSpeed += 1;
+				text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + baseAttack + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+				text2.text = "Upgraded!";
+			}
+			else
+			{
+				text2.text = "Not enough gold to upgrade!";
+			}
+			text3.text = "Costs:\n" + attackSpeedCost(baseAttackSpeed) + " gold";
+		}
+	}
+}
+
+function collectButtonListener(a)
+{
+	collectButton.visible = false;
+	collectButton.inputEnabled = false;
+	
+	actionButton.visible = true;
+	actionButton.inputEnabled = true;
+	
+	currentHealth = maxHealth;
+	currentMonster.currentHealth = currentMonster.maxHealth;
+	currentMonster.frame = 0;
+	text2.text = "Monster Health: \n" + currentMonster.currentHealth + "/" + currentMonster.maxHealth;
+	text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + eval(baseAttack + currentEquip.attack) + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+
+	inventory[6][currentMonster.drop.indexJ] += 1;
+}
+
+function retryButtonListener(a)
+{
+	retryButton.visible = false;
+	retryButton.inputEnabled = false;
+	
+	actionButton.visible = true;
+	actionButton.inputEnabled = true;
+	
+	currentHealth = maxHealth;
+	currentMonster.currentHealth = currentMonster.maxHealth;
+	currentMonster.frame = 0;
+	text2.text = "Monster Health: \n" + currentMonster.currentHealth + "/" + currentMonster.maxHealth;
+	text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + eval(baseAttack + currentEquip.attack) + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+}
+
+//Reset Functions
+function resetBG()
+{
+	mineBG.visible = false;
+	gatherBG.visible = false;
+	woodcutBG.visible = false;
+	fishBG.visible = false;
+	huntBG.visible = false;
+	bugCatchBG.visible = false;
+	
+	trainingBG.visible = false;
+	equipsBG.visible = false;
+	itemsBG.visible = false;
+	questBG.visible = false;
+	
+	mineIcon.visible = false;
+	gatherIcon.visible = false;
+	woodcutIcon.visible = false;
+	fishIcon.visible = false;
+	huntIcon.visible = false;
+	bugCatchIcon.visible = false;
+	questIcon.visible = false;
+	
+	goldText.visible = false;
+	essenceText.visible = false;
+	
+	mineIcon.inputEnabled = false;
+	gatherIcon.inputEnabled = false;
+	woodcutIcon.inputEnabled = false;
+	fishIcon.inputEnabled = false;
+	huntIcon.inputEnabled = false;
+	bugCatchIcon.inputEnabled = false;
+	questIcon.inputEnabled = false;
+	
+	retryButton.visible = false;
+	retryButton.inputEnabled = false;
+	collectButton.visible = false;
+	collectButton.inputEnabled = false;
+}
+
+function resetMainTexts()
+{
+	//Resets main textfields
+	text1.text = "";
+	text2.text = "";
+	text3.text = "";
+}
+
+function resetIcon()
+{
+	//Resets icon
+	if (currentIcon != undefined)
+	{
+		currentIcon.visible = false;
+	}
+}
+
+function resetAmountAndListTexts()
+{
+	//Resets the 14 (7 each) amount and list texts
+	for (i = 0; i < listTextArray.length; i++)
+	{
+		listTextArray[i].text = "";
+		amountTextArray[i].text = "";
+	}
+}
+
+function resetButtons()
+{
+	//Disables buttons
+	for (i = 0; i < buttonArray.length; i++)
+	{
+		for (j = 0; j < buttonArray[i].length; j++)
+		{
+			buttonArray[i][j].visible = false;
+			buttonArray[i][j].inputEnabled = false;
+		}
+	}
+}
+
+function resetButtonDescriptions()
+{
+	buttonText1.text = "";
+	buttonText2.text = "";
+	buttonText3.text = "";
+}
+
+function resetMonster()
+{
+	//Resets monster1
+	if (currentMonster != undefined)
+	{
+		currentMonster.frame = 0;
+		currentMonster.visible = false;
+	}
+}
+
+function resetPlayerAndMonsterHealth()
+{
+	currentHealth = maxHealth;
+	
+	if (currentMonster != undefined)
+	{
+		currentMonster.currentHealth = currentMonster.maxHealth;
+	}
+}
+
+//Utility Functions
+function getNewFarmItem()
+{
+	resetIcon();
+	
+	//"a" determines the first index of inventory
+	var a;
+	
+	if (currentArea == "mine") {a = 0;}
+	else if (currentArea == "gather") {a = 1;}
+	else if (currentArea == "woodcut") {a = 2;}
+	else if (currentArea == "fish") {a = 3;}
+	else if (currentArea == "hunt") {a = 4;}
+	else if (currentArea == "bugCatch") {a = 5;}
+	
+	//Rolls a random integer, then checks to see which drop should be acquired
+	var random = game.rnd.integerInRange(0, 99);
+	
+	for (i = 0; i < currentEquip.equipDrops.length; i++)
+	{
+		if (random < currentEquip.equipDropChances[i])
+		{
+			//Increase inventory value, show current icon, and update textfields
+			inventory[a][currentEquip.equipDrops[i].indexJ] += 1;
+			currentIcon = currentEquip.equipDrops[i];
+			currentIcon.visible = true;
+			text1.text = "Received " + currentIcon.name + "!\nAmount: " + inventory[a][currentEquip.equipDrops[i].indexJ];
+			break;
+		}
+	}
+}
+
+function healthCost(x)
+{
+	var x2;
+	x2 = x + 1;
+	
+	return x2;
+}
+
+function attackCost(x)
+{
+	var x2;
+	x2 = x + 1;
+	
+	return x2;
+}
+
+function defenseCost(x)
+{
+	var x2;
+	x2 = x + 1;
+	
+	return x2;
+}
+
+function attackSpeedCost(x)
+{
+	var x2;
+	x2 = Math.ceil(x + 1);
+	
+	return x2;
+}
+
+//Battle related functions
+function startBattle()
+{
+	actionButton.inputEnabled = false;
+	actionButton.visible = false;
+	
+	//Start with an attack on the monster
+	playerAttacked();
+	
+	//Create timers for player and monster1
+	playerTimer = game.time.create();
+	monsterTimer = game.time.create();
+	
+	playerTimer.loop(1/baseAttackSpeed * 1000, playerAttacked, this);
+	playerTimer.start();
+	
+	monsterTimer.loop(1/currentMonster.attackSpeed * 1000, monsterAttacked, this);
+	monsterTimer.start();
+}
+
+function playerAttacked()
+{
+	//currentMonster.currentHealth -= eval(baseAttack + currentEquip.attack);
+	currentMonster.currentHealth -= 10;
+	
+	if (currentMonster.currentHealth <= 0)
+	{
+		currentMonster.currentHealth = 0;
+		monsterDied();
+	}
+	
+	text2.text = "Monster Health: \n" + currentMonster.currentHealth + "/" + currentMonster.maxHealth;
+}
+
+function monsterAttacked()
+{
+	currentHealth -= eval(currentMonster.attack - baseDefense);
+
+	if (currentHealth <= 0)
+	{
+		currentHealth = 0;
+		playerDied();
+	}
+	
+	text1.text = "Player Health: " + currentHealth + "/" + maxHealth + "\nAttack: " + eval(baseAttack + currentEquip.attack) + "\nDefense: " + baseDefense + "\nAttack Speed (per s): " + baseAttackSpeed;
+}
+
+function monsterDied()
+{
+	text3.text = "You slayed the monster!";
+	
+	collectButton.visible = true;
+	collectButton.inputEnabled = true;
+	
+	endTimers();
+	
+	currentMonster.frame = 2;
+}
+
+function playerDied()
+{
+	text3.text = "You died!";
+	
+	retryButton.visible = true;
+	retryButton.inputEnabled = true;
+	
+	endTimers();
+}
+
+function endTimers()
+{
+	if (playerTimer != undefined)
+	{
+		playerTimer.stop();
+	}
+	
+	if (monsterTimer != undefined)
+	{
+		monsterTimer.stop();
+	}
+}
+
+</script>
+
+</body>
+</html>
